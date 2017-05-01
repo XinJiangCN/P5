@@ -1,28 +1,28 @@
 import java.util.*;
 public class NavigationGraph implements GraphADT<Location, Path> {
 
-    private int id;
-    private List<GraphNode> nodes;
+    private ArrayList<GraphNode<Location, Path>> graph; //adjacency list
+    private String[] edgePropertyNames;
+
     public NavigationGraph(String[] edgePropertyNames) {
-        id = 0;
-        nodes = new ArrayList<GraphNode>();
+        graph = new ArrayList<GraphNode<Location, Path>>();
     }
 
     /**
-     * Adds a vertex to the Graph
-     * 
+     * Adds a vertex to the Graph, NOTE: ID is actually the size of ArrayList
+     *
      * @param vertex
      *            vertex to be added
      */
     public void addVertex(Location vertex) {
-        GraphNode newNode = new GraphNode(vertx, id);
-        nodes.add(newNode);
-        id++;
+        GraphNode<Location, Path> newNode = new GraphNode(vertex, graph.size());
+        graph.add(newNode);
     }
 
     /**
-     * Creates a directed edge from src to dest
-     * 
+     * Creates a directed edge from src to dest. NOTE: the dest param is unused
+     * since we are using adjacency list approach
+     *
      * @param src
      *            source vertex from where the edge is outgoing
      * @param dest
@@ -31,40 +31,56 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      *            edge between src and dest
      */
     public void addEdge(Location src, Location dest, Path edge) {
-        GraphNode source = getGraphNode(src);
-        if (source == null) 
+        //Try to get source id
+        int srcId = getGraphNode(src);
+
+        //Throw IllegalArgumentException when source does not exist
+        if (srcId == -1)
             throw new IllegalArgumentException();
-        source.addOutEdge(edge);
 
-       //TODO FIXIT 
-       //TODO HOW TO CONNECT SRC AND DEST
+        //Add edge to that node
+        graph.get(srcId).addOutEdge(edge);
     }
 
+    /**
+     * Find Graph Node by Location, return -1 when does not
+     * find the id, else return id
+     *
+     * @return id of the node
+     */
+    private int getGraphNode(Location location) {
+        //for-each the graph
+        for(int i = 0; i < graph.size(); i++)
+            //return id when find the correct location
+            if(graph.get(i).equals(location))
+                //return id of the graph
+                return graph.get(i).getId();
 
-    private GraphNode getGraphNode(Location loc) {
-        Iterator itr = nodes.iterator();
-        GraphNode temp = null;
-        while (itr.hasNext()) {
-            temp = itr.next();
-            if (temp.getVertexData().equals(loc))
-                return temp;
-        }
-        return null;
+        //return -1 when cannot find the node
+        return -1;
     }
-
 
     /**
      * Getter method for the vertices
-     * 
+     *
      * @return List of vertices of type V
      */
     public List<Location> getVertices() {
-        return nodes;
+        //NOTE: Experimental
+
+        //create a Location ArrayList
+        ArrayList<Location> list = new ArrayList<Location>();
+
+        //for-each nodes in the graph
+        for(int i = 0; i < graph.size(); i++) {
+            list.add(graph.get(i).getVertexData());
+        }
+        return list;
     }
 
     /**
      * Returns edge if there is one from src to dest vertex else null
-     * 
+     *
      * @param src
      *            Source vertex
      * @param dest
@@ -72,49 +88,70 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      * @return Edge of type E from src to dest
      */
     public Path getEdgeIfExists(Location src, Location dest) {
-        List<Path> dests = getGraphNode(src).getOutEdges();
-        Iterator itr = dests.iterator();
-        Path temp;
-        while (itr.hasNext()) {
-            temp = itr.next();
-            if (temp.getDestination().equals(dest))
-                return temp;
+        //find out ID of the node in the graph
+        int srcId = getGraphNode(src);
+
+        //return null when the src does not exist
+        if(srcId == -1) {
+            return null;
         }
-        return null;
+
+        //get outEdges
+        List<Path> outEdges = graph.get(srcId).getOutEdges();
+
+        //for each all the edges to
+        for(int i = 0; i < outEdges.size(); i++)
+            if(outEdges.get(i).getDestination().equals(dest))
+                return outEdges.get(i);
+
+        //return null when cannot find the path
+        return  null;
     }
 
     /**
      * Returns the outgoing edges from a vertex
-     * 
+     * TODO:// BUG FIX
+     *
      * @param src
      *            Source vertex for which the outgoing edges need to be obtained
      * @return List of edges of type E
      */
     public List<Path> getOutEdges(Location src) {
-        return getGraphNode(src).getOutEdges();
+        return graph.get(getGraphNode(src)).getOutEdges();
     }
 
     /**
      * Returns neighbors of a vertex
-     * 
+     *
      * @param vertex
      *            vertex for which the neighbors are required
      * @return List of vertices(neighbors) of type V
      */
     public List<Location> getNeighbors(Location vertex) {
-        List<Location> neighbors = new ArrayList<Location>();
-        List<Path> paths = this.getOutEdges();
-        if (paths.size() == 0) 
+        if (graph.size() == 0)
             throw new IllegalArgumentException();
-        
-        
+
+        List<Location> neighbors = new ArrayList<Location>();
+        for(int i = 0; i < graph.size(); i++) {
+            //search for the node
+            if(vertex.equals(graph.get(i))) {
+                //get the out edges
+                List<Path> l = graph.get(i).getOutEdges();
+                //add each dest to the list
+                for(int j = 0; j < l.size(); j++) {
+                   neighbors.add(l.get(i).getDestination());
+                }
+            }
+        }
+
+        //return the list
         return neighbors;
     }
 
     /**
      * Calculate the shortest route from src to dest vertex using
      * edgePropertyName
-     * 
+     *
      * @param src
      *            Source vertex from which the shortest route is desired
      * @param dest
@@ -130,17 +167,16 @@ public class NavigationGraph implements GraphADT<Location, Path> {
 
     /**
      * Getter method for edge property names
-     * 
+     *
      * @return array of String that denotes the edge property names
      */
     public String[] getEdgePropertyNames() {
-
-        return null;
+        return edgePropertyNames;
     }
 
     /**
      * Return a string representation of the graph
-     * 
+     *
      * @return String representation of the graph
      */
     public String toString() {
@@ -151,13 +187,20 @@ public class NavigationGraph implements GraphADT<Location, Path> {
 
     /**
      * Returns a Location object given its name
-     * 
+     *
      * @param name
      *            name of the location
      * @return Location object
      */
     public Location getLocationByName(String name) {
-        return null; //TODO: implement correctly. 
+        //for each node
+        for(int i = 0; i < graph.size(); i++)
+            //if Location name is correct
+            if(graph.get(i).getVertexData().getName().equals(name))
+                //return Location
+                return graph.get(i).getVertexData();
+        //else return null
+        return null;
     }
 
 }
