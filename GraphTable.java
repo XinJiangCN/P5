@@ -1,36 +1,44 @@
-class GraphTable<V> {
-    private boolean visited;
-    private int totalWeight;
-    private V predecessor;
-    final int MAX_WEIGHT = 65536;
 
-    public GraphTable() {
-        visited = false;
-        totalWeight = MAX_WEIGHT;    
-        predecessor = null;
-    }
+class GraphTable implements Comparable<GraphTable> {
+    private double totalWeight;
+    private GraphNode predecessor;
+    private boolean isVisited;
+    private GraphNode node;
     
-    public int getTotalWeight() {
-        return totalWeight;
+    public GraphTable(GraphNode graphGraphNodeode) {
+    		totalWeight = 0.0;
+    		node = graphGraphNodeode;
+    		isVisited = false;
+    		predecessor = null;
     }
-    
-    public V getPredecessor() {
-        return predecessor;
-    }
-
-    public boolean getVisited() {
-        return visited;
-    }
-    
     public void setVisited() {
-        visited = true;
+    		isVisited = true;
     }
-
-    public void setTotalWeight(int weight) {
-        totalWeight = weight;
+    public void setTotalWeight(double tw) {
+    		totalWeight = tw;
     }
-
-    public void setPredecessor(V pre) {
-        predecessor = pre;
+    public void setPredecessor(GraphNode pre) {
+    		predecessor = pre;
     }
+    public GraphNode getPredecessor() {
+    		return predecessor;
+    }
+    public boolean getisVisited() {
+    		return isVisited;
+    }
+    public double gettotalWeight() {
+    		return totalWeight;
+    }
+    public GraphNode getNode() {
+    		return node;
+    }
+	@Override
+	public int compareTo(GraphTable o) {
+		if (totalWeight < o.totalWeight)
+			return -1;
+		if (totalWeight > o.totalWeight)
+			return 1;
+		return 0;
+	}
+    
 }

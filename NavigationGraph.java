@@ -170,13 +170,33 @@ public class NavigationGraph implements GraphADT<Location, Path> {
         if(edgePropertyNameId == -1)
             throw new IllegalArgumentException();
 
-        //prepare dist arry
-        double[] dist = new double[graph.size()];
-
-        //initialize the dist array, set dist to max
-        for(int i = 0; i < dist.length; i++)
-            dist[i] = Double.MAX_VALUE;
-
+       
+        	PriorityQueue<GraphTable> nodes = new PriorityQueue();
+        for (GraphNode node: graph) {
+        		GraphTable temp = new GraphTable(node);
+        		if (node.getVertexData().equals(src)) {
+        			temp.setTotalWeight(0);
+        			nodes.add(temp);
+        		} else {
+        			temp.setTotalWeight(Double.MAX_VALUE);
+        			nodes.add(temp);
+        		}
+        		temp.setPredecessor(null);
+        }
+        	
+        int passedNodes = 0;
+        while (!nodes.isEmpty()) {
+        		GraphTable smallest = nodes.poll();
+        		if (smallest.getNode().getVertexData().equals(dest)) {
+        			List<Location> paths = new ArrayList<Location>();
+        			for (int i = 0; i < passedNodes - 1; i++) {
+        				paths.add(smallest.getNode().getVertexData());
+        			}
+        		}
+        	
+        }
+        
+        
         return null;
     }
 
