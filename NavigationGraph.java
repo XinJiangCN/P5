@@ -110,7 +110,6 @@ public class NavigationGraph implements GraphADT<Location, Path> {
 
     /**
      * Returns the outgoing edges from a vertex
-     * TODO:// BUG FIX
      *
      * @param src
      *            Source vertex for which the outgoing edges need to be obtained
@@ -161,6 +160,22 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      * @return List of edges that denote the shortest route by edgePropertyName
      */
     public List<Path> getShortestRoute(Location src, Location dest, String edgePropertyName) {
+        //find out the position in the properties arry
+        int edgePropertyNameId = -1;
+        for(int i = 0; i < edgePropertyNames.length; i++)
+            if(edgePropertyNames[i].equals(edgePropertyName))
+                edgePropertyNameId = i;
+
+        //if cannot find edgePropertyName then throw IllegalArgumentException
+        if(edgePropertyNameId == -1)
+            throw new IllegalArgumentException();
+
+        //prepare dist arry
+        double[] dist = new double[graph.size()];
+
+        //initialize the dist array, set dist to max
+        for(int i = 0; i < dist.length; i++)
+            dist[i] = Double.MAX_VALUE;
 
         return null;
     }
@@ -180,8 +195,7 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      * @return String representation of the graph
      */
     public String toString() {
-
-        return null;
+        return "MotherFucker";
     }
 
 
