@@ -3,9 +3,11 @@ public class NavigationGraph implements GraphADT<Location, Path> {
     final private static Double INFINITE = Double.MAX_VALUE;
     private ArrayList<GraphNode<Location, Path>> graph; //adjacency list
     private String[] edgePropertyNames;
+    private int id;
 
     public NavigationGraph(String[] edgePropertyNames) {
-        graph = new ArrayList<GraphNode<Location, Path>>();
+        graph =  new ArrayList<GraphNode<Location,Path>>();
+        id = 0;
     }
 
     /**
@@ -15,8 +17,9 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      *            vertex to be added
      */
     public void addVertex(Location vertex) {
-        GraphNode<Location, Path> newNode = new GraphNode(vertex, graph.size());
+    	GraphNode newNode = new GraphNode(vertex, id);
         graph.add(newNode);
+        id++;
     }
 
     /**
@@ -31,15 +34,10 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      *            edge between src and dest
      */
     public void addEdge(Location src, Location dest, Path edge) {
-        //Try to get source id
-        int srcId = getGraphNode(src);
-
-        //Throw IllegalArgumentException when source does not exist
-        if (srcId == -1)
-            throw new IllegalArgumentException();
-
-        //Add edge to that node
-        graph.get(srcId).addOutEdge(edge);
+    	GraphNode source = getGraphNode(src);
+    	 if (source == null)
+    		 throw new IllegalArgumentException();
+         source.addOutEdge(edge);
     }
 
     /**
@@ -48,17 +46,14 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      *
      * @return id of the node
      */
-    private int getGraphNode(Location location) {
-        //for-each the graph
-        for(int i = 0; i < graph.size(); i++)
-            //return id when find the correct location
-            if(graph.get(i).equals(location))
-                //return id of the graph
-                return graph.get(i).getId();
-
-        //return -1 when cannot find the node
-        return -1;
+    private GraphNode getGraphNode(Location loc) {
+    	for (GraphNode temp : graph) {
+            if (temp.getVertexData().equals(loc))
+                return temp;
+        }
+        return null;
     }
+
 
     /**
      * Getter method for the vertices
@@ -88,24 +83,12 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      * @return Edge of type E from src to dest
      */
     public Path getEdgeIfExists(Location src, Location dest) {
-        //find out ID of the node in the graph
-        int srcId = getGraphNode(src);
-
-        //return null when the src does not exist
-        if(srcId == -1) {
-            return null;
+    	List<Path> dests = getGraphNode(src).getOutEdges();
+        for (Path d : dests) {
+        	if (d.getDestination().equals(dest))
+        		return d;
         }
-
-        //get outEdges
-        List<Path> outEdges = graph.get(srcId).getOutEdges();
-
-        //for each all the edges to
-        for(int i = 0; i < outEdges.size(); i++)
-            if(outEdges.get(i).getDestination().equals(dest))
-                return outEdges.get(i);
-
-        //return null when cannot find the path
-        return  null;
+        return null;
     }
 
     /**
@@ -116,7 +99,7 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      * @return List of edges of type E
      */
     public List<Path> getOutEdges(Location src) {
-        return graph.get(getGraphNode(src)).getOutEdges();
+        return graph.get(getGraphNode(src).getId()).getOutEdges();
     }
 
     /**
@@ -176,7 +159,7 @@ public class NavigationGraph implements GraphADT<Location, Path> {
         PriorityQueue<GraphTable> nodes = new PriorityQueue();
 
         for (GraphNode gn: graph) {
-            if (getGraphNode(src) == gn.getId()) {
+            if (getGraphNode(src).equals(gn.getVertexData())) {
                 distances.put((Location)gn.getVertexData(), 0.0);
                 nodes.add(new GraphTable((Location)gn.getVertexData(), 0));
             } else {
