@@ -99,7 +99,7 @@ public class NavigationGraph implements GraphADT<Location, Path> {
      * @return List of edges of type E
      */
     public List<Path> getOutEdges(Location src) {
-        return graph.get(getGraphNode(src).getId()).getOutEdges();
+    	return getGraphNode(src).getOutEdges();
     }
 
     /**
@@ -190,11 +190,13 @@ public class NavigationGraph implements GraphADT<Location, Path> {
                 neighbors.add((GraphTable)nodes.toArray()[i]);
             }
             for (GraphTable table : neighbors) {
-                Double newWeight = distances.get(nearest.getLocation()) + table.getDist();
-                if (newWeight < distances.get(table.getLocation()))
+                Double newWeight = distances.get(nearest.getLocation()) 
+                		+ getEdgeIfExists(src,dest).getProperties().get(edgePropertyNameId);
+                if (newWeight < distances.get(table.getLocation())) {
                     distances.put(table.getLocation(), newWeight);
-                previous.put(table.getLocation(), nearest);
-tableRenewloop:
+                    previous.put(table.getLocation(), nearest);
+                }
+                tableRenewloop:
                 for (GraphTable n : nodes) {
                     if (n.getLocation().equals(table.getLocation())) {
                         nodes.remove(n);
