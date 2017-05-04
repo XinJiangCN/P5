@@ -175,11 +175,72 @@ public class MapApp {
      *             if any property value is not numeric
      */
 
-    public static NavigationGraph createNavigationGraphFromMapFile(String graphFilepath){
-            // TODO: read/parse the input file graphFilepath and create
-            // NavigationGraph with vertices and edges
-            return null;
+    public static NavigationGraph createNavigationGraphFromMapFile(String graphFilepath)
+        throws FileNotFoundException, InvalidFileException {
+            Scanner input = new Scanner(new File(graphFilepath));
+            String tmp = null;
+            try {
+                //read the next line
+                tmp = input.nextLine();
+            } catch(Exception e) {
+                //throw invalid file when the file is empty
+                throw new InvalidFileException(graphFilepath);
+            }
 
+            //get properties
+            String[] elements = tmp.split(" ");
+
+            if(elements.length < 3) {
+                throw new InvalidFileException(graphFilepath);
+            }
+
+            String[] graphProperties = new String[elements.length - 2];
+
+            //properties
+            for(int i = 2; i < elements.length; i++) {
+                graphProperties[i - 2] = elements[i];
+            }
+
+            //create the new graph
+            NavigationGraph graph = new NavigationGraph(graphProperties);
+            //read rest of the file
+            while(input.hasNextLine()) {
+                //get the line
+                String in = input.nextLine();
+
+                //splite the line
+                String[] lineElements = in.split(" ");
+
+                //throw Invalid file exception when length does not match
+                if(lineElements.length != elements.length) {
+                    throw new InvalidFileException(graphFilepath);
+                }
+
+                // add source and dest to the graph
+                Location source = graph.getLocationByName(lineElements[0]);
+                Location dest = graph.getLocationByName(lineElements[1]);
+
+                if(source == null) {
+                    source = new Location(lineElements[0]);
+                    graph.addVertex(source);
+                }
+
+                if(dest == null) {
+                    dest = new Location(lineElements[1]);
+                    graph.addVertex(dest);
+                }
+
+                //add edge
+                ArrayList<Double> edgeProperties = new ArrayList<Double>();
+                for(int i = 2; i < elements.length; i++) {
+                    try {
+                        edgeProperties.add(Double.parseDouble(lineElements[i]));
+                    } catch(Exception e) {
+                        throw new InvalidFileException(graphFilepath);
+                    }
+                }
+                graph.addEdge(source, dest, new Path(source, dest, edgeProperties));
+            }
+            return graph;
     }
-
 }
